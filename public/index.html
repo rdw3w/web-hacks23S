@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>OSINT HUB // rdw3w</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/exif-js@2.3.0/exif.min.js"></script>
+  <style>
+:root{--bg:#050505;--card:rgba(10,20,30,0.7);--neon:#00f3ff;--red:#ff0055;--green:#00ff9d;--purple:#bc13fe;--yellow:#ffd000;--text:#c8d6e5;--glass:rgba(255,255,255,0.03);--border:rgba(0,243,255,0.2)}
+*{margin:0;padding:0;box-sizing:border-box;scrollbar-width:thin;scrollbar-color:var(--neon) #000}
+body{font-family:'Rajdhani',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;min-height:100vh;position:relative}
+#matrix{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;opacity:0.04;pointer-events:none}
+.grid-bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:50px 50px;transform:perspective(500px) rotateX(60deg) translateY(200px) scale(2);opacity:0.12}
+.container{position:relative;z-index:2;max-width:1100px;margin:0 auto;padding:20px}
+.header{text-align:center;padding:30px 0 10px;position:relative}
+.header h1{font-family:'Orbitron',sans-serif;font-size:2.2rem;background:linear-gradient(90deg,var(--neon),var(--purple),var(--neon));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 20px rgba(0,243,255,0.2);letter-spacing:4px}
+.header p{color:var(--neon);font-family:'Orbitron',sans-serif;letter-spacing:6px;font-size:0.75rem;margin-top:6px;opacity:0.8}
+.tabs{display:flex;justify-content:center;gap:10px;margin:18px 0;flex-wrap:wrap}
+.tab-btn{background:var(--card);border:1px solid var(--border);color:var(--text);padding:10px 18px;border-radius:8px;cursor:pointer;font-family:'Orbitron',sans-serif;font-size:0.85rem;transition:0.25s;backdrop-filter:blur(5px)}
+.tab-btn:hover,.tab-btn.active{border-color:var(--neon);color:var(--neon);box-shadow:0 0 15px rgba(0,243,255,0.2);transform:scale(1.03)}
+.panel{display:none;padding:10px 0}
+.panel.active{display:block}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:18px;backdrop-filter:blur(6px)}
+.input-group{display:flex;gap:10px;margin-top:12px}
+.input-group input, .input-group select{flex:1;background:rgba(0,0,0,0.45);border:1px solid var(--border);color:white;padding:10px 12px;border-radius:8px;font-size:0.98rem}
+.search-btn{background:linear-gradient(45deg,var(--neon),var(--purple));border:none;color:black;font-weight:700;padding:10px 18px;border-radius:8px;cursor:pointer;font-family:'Orbitron',sans-serif}
+.data-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-top:14px}
+.data-card{background:rgba(0,0,0,0.6);border-left:3px solid var(--neon);padding:12px;border-radius:8px}
+.data-label{font-size:0.75rem;color:var(--neon);font-family:'Orbitron',sans-serif;margin-bottom:6px}
+.data-value{font-size:0.95rem;color:white;word-break:break-word}
+.copy-btn{background:transparent;border:1px dashed var(--neon);color:var(--neon);padding:8px 10px;border-radius:6px;cursor:pointer}
+.settings-btn{position:fixed;right:18px;bottom:18px;background:linear-gradient(45deg,var(--purple),var(--neon));border:none;color:black;padding:12px 14px;border-radius:999px;box-shadow:0 8px 30px rgba(0,0,0,0.5);cursor:pointer}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;padding:20px;z-index:999}
+.modal.show{display:flex}
+.modal-card{background:var(--card);border:1px solid var(--border);padding:18px;border-radius:12px;width:100%;max-width:820px}
+.kv{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+.kv input{flex:1}
+.small{font-size:0.85rem;color:rgba(255,255,255,0.7)}
+.footer{text-align:center;padding:20px 0;font-family:'Orbitron',sans-serif;font-size:0.72rem;color:rgba(255,255,255,0.2);letter-spacing:2px;border-top:1px solid var(--border);margin-top:24px}
+@media(max-width:600px){.header h1{font-size:1.35rem}.input-group{flex-direction:column}.data-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <canvas id="matrix"></canvas>
+  <div class="grid-bg"></div>
+  <div class="container">
+    <div class="header">
+      <h1>OSINT HUB</h1>
+      <p>DEVELOPED BY rdw3w — Configure your APIs in Settings</p>
+    </div>
+
+    <div class="tabs" role="tablist">
+      <button class="tab-btn active" data-target="vehicle">VEHICLE</button>
+      <button class="tab-btn" data-target="mobile">MOBILE</button>
+      <button class="tab-btn" data-target="ip">IP</button>
+      <button class="tab-btn" data-target="meta">IMAGE META</button>
+      <button class="tab-btn" data-target="pincode">PINCODE/NUMBER</button>
+    </div>
+
+    <section id="vehicle" class="panel active">
+      <div class="sc">
+        <div class="small">VEHICLE RC TRACE</div>
+        <div class="input-group">
+          <input id="rcInput" placeholder="Enter RC (eg. MH12DE1433)">
+          <button id="rcBtn" class="search-btn">HACK</button>
+        </div>
+        <div id="rcResult" class="data-grid" style="margin-top:14px"></div>
+      </div>
+    </section>
+
+    <section id="mobile" class="panel">
+      <div class="sc">
+        <div class="small">MOBILE NUMBER OSINT</div>
+        <div class="input-group">
+          <input id="mobileInput" placeholder="Enter mobile number (eg. 9876543210)">
+          <button id="mobileBtn" class="search-btn">HACK</button>
+        </div>
+        <div id="mobileResult" class="data-grid" style="margin-top:14px"></div>
+      </div>
+    </section>
+
+    <section id="ip" class="panel">
+      <div class="sc">
+        <div class="small">IP GEO-LOCATION & THREAT ANALYSIS</div>
+        <div class="input-group">
+          <input id="ipInput" placeholder="Enter IP address (eg. 1.2.3.4)">
+          <button id="ipBtn" class="search-btn">HACK</button>
+        </div>
+        <div id="ipResult" class="data-grid" style="margin-top:14px"></div>
+      </div>
+    </section>
+
+    <section id="meta" class="panel">
+      <div class="sc">
+        <div class="small">UPLOAD IMAGE FOR METADATA (EXIF)</div>
+        <div style="margin-top:10px;display:flex;gap:10px;align-items:center">
+          <input type="file" id="imageInput" accept="image/*">
+          <button id="metaBtn" class="search-btn">EXTRACT</button>
+        </div>
+        <div id="metaResult" class="data-grid" style="margin-top:14px"></div>
+      </div>
+    </section>
+
+    <section id="pincode" class="panel">
+      <div class="sc">
+        <div class="small">PINCODE / NUMBER LOOKUP</div>
+        <div class="input-group">
+          <input id="pincodeInput" placeholder="Enter pincode or number">
+          <button id="pincodeBtn" class="search-btn">LOOKUP</button>
+        </div>
+        <div id="pincodeResult" class="data-grid" style="margin-top:14px"></div>
+      </div>
+    </section>
+
+    <div class="footer">System designed & coded by rdw3w • Configure your APIs in Settings before use</div>
+  </div>
+
+  <button id="openSettings" class="settings-btn" title="Settings"><i class="fa fa-cog"></i></button>
+
+  <div id="settingsModal" class="modal" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <h3 style="font-family:Orbitron;margin-bottom:8px">Settings — API Endpoints (stored locally)</h3>
+      <p class="small" style="margin-bottom:12px">Paste your API endpoint templates below. Use placeholders: {rc}, {mobile}, {ip}, {q}, {num}. Example: https://example.com/lookup?rc={rc}&key=APIKEY</p>
+
+      <div class="kv"><label style="width:170px;color:var(--neon)">Vehicle API</label><input id="cfgVehicle" placeholder="https://.../?rc={rc}&key=..."></div>
+      <div class="kv"><label style="width:170px;color:var(--neon)">Mobile API</label><input id="cfgMobile" placeholder="https://.../?mobile={mobile}&key=..."></div>
+      <div class="kv"><label style="width:170px;color:var(--neon)">IP API</label><input id="cfgIP" placeholder="https://.../?ip={ip}&key=..."></div>
+      <div class="kv"><label style="width:170px;color:var(--neon)">Pincode API</label><input id="cfgPincode" placeholder="https://.../pincode?q={q}&key=..."></div>
+      <div class="kv"><label style="width:170px;color:var(--neon)">Number API</label><input id="cfgNumber" placeholder="https://.../lookup?num={num}&key=..."></div>
+
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px">
+        <button id="saveCfg" class="search-btn">Save</button>
+        <button id="closeCfg" class="copy-btn">Close</button>
+      </div>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:12px 0">
+      <div class="small">Notes: Do not paste secrets into this repo. Values are saved in your browser localStorage only. You are responsible for lawful use.</div>
+    </div>
+  </div>
+
+  <script>
+// Matrix background (small visual)
+(function(){const c=document.getElementById('matrix');c.width=window.innerWidth;c.height=window.innerHeight;const ctx=c.getContext('2d');const cols=Math.floor(c.width/20)+1;const ypos=new Array(cols).fill(0);function matrix(){ctx.fillStyle='rgba(0,0,0,0.2)';ctx.fillRect(0,0,c.width,c.height);ctx.fillStyle='rgba(0,243,255,0.06)';ctx.font='15pt Orbitron';for(let i=0;i<ypos.length;i++){const text=String.fromCharCode(48+Math.random()*42);ctx.fillText(text,i*20,ypos[i]*20);if(ypos[i]*20>c.height+Math.random()*1000)ypos[i]=0;ypos[i]++;}}setInterval(matrix,60);window.addEventListener('resize',()=>{c.width=window.innerWidth;c.height=window.innerHeight;});})();
+
+// Tab logic
+document.querySelectorAll('.tab-btn').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');const tgt=btn.dataset.target;document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById(tgt).classList.add('active');});});
+
+// Settings modal
+const modal=document.getElementById('settingsModal');document.getElementById('openSettings').addEventListener('click',()=>{loadCfgToForm();modal.classList.add('show');});document.getElementById('closeCfg').addEventListener('click',()=>modal.classList.remove('show'));
+
+document.getElementById('saveCfg').addEventListener('click',()=>{const cfg={vehicle:document.getElementById('cfgVehicle').value.trim(),mobile:document.getElementById('cfgMobile').value.trim(),ip:document.getElementById('cfgIP').value.trim(),pincode:document.getElementById('cfgPincode').value.trim(),number:document.getElementById('cfgNumber').value.trim()};localStorage.setItem('osint_cfg',JSON.stringify(cfg));modal.classList.remove('show');showToast('Settings saved locally');});
+function loadCfgToForm(){const cfg=JSON.parse(localStorage.getItem('osint_cfg')||'{}');document.getElementById('cfgVehicle').value=cfg.vehicle||'';document.getElementById('cfgMobile').value=cfg.mobile||'';document.getElementById('cfgIP').value=cfg.ip||'';document.getElementById('cfgPincode').value=cfg.pincode||'';document.getElementById('cfgNumber').value=cfg.number||''}
+
+function showToast(msg){let t=document.getElementById('toast');if(!t){t=document.createElement('div');t.id='toast';document.body.appendChild(t);}t.textContent=msg;t.className='';setTimeout(()=>t.className='show',50);setTimeout(()=>t.className='',3500);}loadCfgToForm();
+
+// Utility: format JSON into labeled cards and copy
+function renderObjectAsCards(obj, container){container.innerHTML='';if(!obj) return;const flat=jsonPretty(obj);const pre=document.createElement('pre');pre.className='data-card';pre.style.whiteSpace='pre-wrap';pre.textContent=flat;const copy=document.createElement('button');copy.className='copy-btn';copy.textContent='Copy';copy.addEventListener('click',()=>{navigator.clipboard.writeText(flat);showToast('Copied to clipboard');});const wrapper=document.createElement('div');wrapper.style.gridColumn='1/-1';wrapper.appendChild(pre);wrapper.appendChild(copy);container.appendChild(wrapper);}function jsonPretty(o){try{return typeof o==='string'?o:JSON.stringify(o,null,2)}catch(e){return String(o)}}
+
+// Replace placeholders
+function buildUrl(template, params){if(!template) return null;let url=template;Object.keys(params).forEach(k=>{url=url.replace(new RegExp('\\{'+k+'\\}','g'),encodeURIComponent(params[k]));});return url}
+
+// Call helper with CORS/Fetch
+async function callApi(url){try{const res=await fetch(url);const txt=await res.text();try{return JSON.parse(txt)}catch(e){return {raw:txt}}}catch(e){return {error:e.message}}}
+
+// VEHICLE
+document.getElementById('rcBtn').addEventListener('click',async()=>{const rc=document.getElementById('rcInput').value.trim();const out=document.getElementById('rcResult');out.innerHTML='';if(!rc){showToast('Enter RC first');return;}const cfg=JSON.parse(localStorage.getItem('osint_cfg')||'{}');const tpl=cfg.vehicle;if(!tpl){showToast('Set Vehicle API in Settings');return;}const url=buildUrl(tpl,{rc});if(!url){showToast('Invalid template');return;}out.innerHTML='<div class="data-card small">Fetching...</div>';const data=await callApi(url);renderObjectAsCards(data,out);});
+
+// MOBILE
+document.getElementById('mobileBtn').addEventListener('click',async()=>{const mobile=document.getElementById('mobileInput').value.trim();const out=document.getElementById('mobileResult');out.innerHTML='';if(!mobile){showToast('Enter mobile number');return;}const cfg=JSON.parse(localStorage.getItem('osint_cfg')||'{}');const tpl=cfg.mobile;if(!tpl){showToast('Set Mobile API in Settings');return;}const url=buildUrl(tpl,{mobile,num:mobile});if(!url){showToast('Invalid template');return;}out.innerHTML='<div class="data-card small">Fetching...</div>';const data=await callApi(url);renderObjectAsCards(data,out);});
+
+// IP
+document.getElementById('ipBtn').addEventListener('click',async()=>{const ip=document.getElementById('ipInput').value.trim();const out=document.getElementById('ipResult');out.innerHTML='';if(!ip){showToast('Enter IP');return;}const cfg=JSON.parse(localStorage.getItem('osint_cfg')||'{}');const tpl=cfg.ip;if(!tpl){showToast('Set IP API in Settings');return;}const url=buildUrl(tpl,{ip});if(!url){showToast('Invalid template');return;}out.innerHTML='<div class="data-card small">Fetching...</div>';const data=await callApi(url);renderObjectAsCards(data,out);});
+
+// PINCODE/NUMBER
+document.getElementById('pincodeBtn').addEventListener('click',async()=>{const q=document.getElementById('pincodeInput').value.trim();const out=document.getElementById('pincodeResult');out.innerHTML='';if(!q){showToast('Enter pincode or number');return;}const cfg=JSON.parse(localStorage.getItem('osint_cfg')||'{}');let tpl=cfg.pincode||cfg.number;if(!tpl){showToast('Set Pincode/Number API in Settings');return;}const url=buildUrl(tpl,{q,num:q});if(!url){showToast('Invalid template');return;}out.innerHTML='<div class="data-card small">Fetching...</div>';const data=await callApi(url);renderObjectAsCards(data,out);});
+
+// IMAGE META using exif-js
+document.getElementById('metaBtn').addEventListener('click',async()=>{const input=document.getElementById('imageInput');const out=document.getElementById('metaResult');out.innerHTML='';if(!input.files.length){showToast('Choose an image file');return;}const file=input.files[0];const reader=new FileReader();reader.onload=function(e){try{const arrayBuffer=e.target.result;EXIF.getData({src:arrayBuffer}, function(){const all=EXIF.getAllTags(this);const formatted=processExif(all);renderObjectAsCards(formatted,out);});}catch(err){renderObjectAsCards({error:err.message},out);} };reader.readAsArrayBuffer(file);});
+
+function processExif(tags){const out=Object.assign({},tags);
+ // Convert GPS if present
+ if(tags.GPSLatitude && tags.GPSLongitude){const lat=convertDMSToDD(tags.GPSLatitude, tags.GPSLatitudeRef);const lon=convertDMSToDD(tags.GPSLongitude, tags.GPSLongitudeRef);out.GPSDecimal={lat,lon};}
+ return out;}
+function convertDMSToDD(dms, ref){if(!Array.isArray(dms)) return null;const [deg, min, sec]=dms;let dd=deg + min/60 + sec/3600; if(ref==='S' || ref==='W') dd = dd * -1; return Number(dd.toFixed(7));}
+
+// Simple copy helper for more controls
+// End of script
+  </script>
+</body>
+</html>
